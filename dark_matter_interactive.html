@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dark Matter: The Invisible Universe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0e27;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        .hero {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #particles-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .hero-content {
+            z-index: 1;
+            text-align: center;
+            max-width: 900px;
+            padding: 0 2rem;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 3s ease-in-out infinite;
+        }
+
+        @keyframes glow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
+        .subtitle {
+            font-size: 1.5rem;
+            color: #a0aec0;
+            margin-bottom: 3rem;
+            font-weight: 300;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+            z-index: 1;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .scroll-indicator::after {
+            content: '↓';
+            font-size: 2rem;
+            color: #667eea;
+        }
+
+        section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #667eea;
+            text-align: center;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #1e2139 0%, #2d3250 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+            border-radius: 20px;
+            opacity: 0;
+            z-index: -1;
+            transition: opacity 0.3s ease;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .stat-number {
+            font-size: 3.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1.1rem;
+            color: #a0aec0;
+            margin-top: 1rem;
+        }
+
+        .interactive-section {
+            background: linear-gradient(135deg, #1a1d35 0%, #252a45 100%);
+            border-radius: 30px;
+            padding: 3rem;
+            margin: 4rem 0;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+        }
+
+        .galaxy-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            margin: 2rem 0;
+            border-radius: 20px;
+            overflow: hidden;
+            background: radial-gradient(ellipse at center, #1a1d35 0%, #0a0e27 100%);
+        }
+
+        #galaxy-canvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .control-label {
+            min-width: 180px;
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+            border: none;
+        }
+
+        .value-display {
+            min-width: 80px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #f093fb;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 0.5rem 1rem;
+            border-radius: 10px;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .comparison-card {
+            background: linear-gradient(135deg, #2d3250 0%, #1e2139 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .comparison-card.with-dark-matter {
+            border-color: #667eea;
+        }
+
+        .comparison-card.without-dark-matter {
+            border-color: #f093fb;
+        }
+
+        .comparison-card h3 {
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .comparison-visual {
+            width: 100%;
+            height: 300px;
+            border-radius: 15px;
+            margin: 1.5rem 0;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 2rem 0;
+            margin: 4rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 3px;
+            height: 100%;
+            background: linear-gradient(to bottom, #667eea 0%, #764ba2 50%, #f093fb 100%);
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin: 3rem 0;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row;
+        }
+
+        .timeline-item:nth-child(even) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            flex: 1;
+            padding: 2rem;
+            background: linear-gradient(135deg, #1e2139 0%, #2d3250 100%);
+            border-radius: 15px;
+            margin: 0 3rem;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+        }
+
+        .timeline-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .timeline-year {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .detection-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .method-card {
+            background: linear-gradient(135deg, #1e2139 0%, #2d3250 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .method-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .method-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .method-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #e2e8f0;
+            text-align: center;
+        }
+
+        .method-description {
+            color: #a0aec0;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .quiz-section {
+            background: linear-gradient(135deg, #2d3250 0%, #1e2139 100%);
+            padding: 3rem;
+            border-radius: 20px;
+            margin: 4rem 0;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-question {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            color: #e2e8f0;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .quiz-option {
+            background: rgba(102, 126, 234, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .quiz-option:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.2);
+        }
+
+        .quiz-option.correct {
+            border-color: #48bb78;
+            background: rgba(72, 187, 120, 0.2);
+        }
+
+        .quiz-option.incorrect {
+            border-color: #f56565;
+            background: rgba(245, 101, 101, 0.2);
+        }
+
+        .quiz-feedback {
+            text-align: center;
+            font-size: 1.2rem;
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .quiz-feedback.show {
+            display: block;
+        }
+
+        .quiz-feedback.correct {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .quiz-feedback.incorrect {
+            background: rgba(245, 101, 101, 0.2);
+            color: #f56565;
+        }
+
+        .theory-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .theory-card {
+            background: linear-gradient(135deg, #1e2139 0%, #2d3250 100%);
+            padding: 2.5rem;
+            border-radius: 20px;
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theory-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .theory-card:hover::after {
+            opacity: 1;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-10px);
+            border-color: #667eea;
+            box-shadow: 0 15px 35px rgba(102, 126, 234, 0.3);
+        }
+
+        .theory-name {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #f093fb 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .theory-description {
+            color: #a0aec0;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .theory-status {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-leading {
+            background: rgba(72, 187, 120, 0.2);
+            color: #48bb78;
+        }
+
+        .status-emerging {
+            background: rgba(237, 137, 54, 0.2);
+            color: #ed8936;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .cta-section {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: linear-gradient(135deg, #1e2139 0%, #2d3250 100%);
+            border-radius: 30px;
+            margin: 4rem 0;
+        }
+
+        .cta-section h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .cta-section p {
+            font-size: 1.3rem;
+            color: #a0aec0;
+            margin-bottom: 2.5rem;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .info-text {
+            color: #cbd5e0;
+            line-height: 1.8;
+            font-size: 1.1rem;
+            margin: 2rem 0;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .highlight {
+            color: #f093fb;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+
+            h2 {
+                font-size: 2rem;
+            }
+
+            .comparison-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .timeline::before {
+                left: 0;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+            }
+
+            .timeline-content {
+                margin: 2rem 0 2rem 3rem;
+            }
+
+            .timeline-marker {
+                left: 0;
+                transform: none;
+            }
+
+            .quiz-options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .particle-effect {
+            position: fixed;
+            width: 4px;
+            height: 4px;
+            background: #667eea;
+            border-radius: 50%;
+            pointer-events: none;
+            animation: float 4s linear infinite;
+            opacity: 0.6;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(50px);
+                opacity: 0;
+            }
+        }
+
+        .web-visualization {
+            width: 100%;
+            height: 400px;
+            margin: 2rem 0;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #web-canvas {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <canvas id="particles-canvas"></canvas>
+        <div class="hero-content">
+            <h1>Dark Matter</h1>
+            <p class="subtitle">Exploring the invisible 85% of our universe</p>
+        </div>
+        <div class="scroll-indicator" onclick="document.getElementById('intro').scrollIntoView({behavior: 'smooth'})"></div>
+    </div>
+
+    <section id="intro">
+        <h2>What is Dark Matter?</h2>
+        <p class="info-text">
+            Dark matter is an invisible substance that makes up <span class="highlight">85% of all matter</span> in the universe. 
+            We can't see it directly, but we know it exists because of its gravitational effects on visible matter like stars and galaxies. 
+            Without dark matter, galaxies would fly apart and the universe would be smooth and uniform—and we wouldn't exist.
+        </p>
+
+        <div class="stat-grid">
+            <div class="stat-card">
+                <div class="stat-number">85%</div>
+                <div class="stat-label">of all matter in the universe</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">27%</div>
+                <div class="stat-label">of total universe composition</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">1930s</div>
+                <div class="stat-label">First evidence discovered</div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>The Dark Matter Web</h2>
+        <p class="info-text">
+            Dark matter forms an invisible cosmic web throughout the universe, creating a scaffold for galaxies to form and cluster. 
+            This simulation shows how dark matter (shown in purple) creates the structure we see in the universe today.
+        </p>
+        <div class="web-visualization">
+            <canvas id="web-canvas"></canvas>
+        </div>
+    </section>
+
+    <section>
+        <h2>Interactive Galaxy Simulation</h2>
+        <p class="info-text">
+            Galaxies rotate surprisingly fast—so fast they should fly apart based on visible matter alone. 
+            Adjust the dark matter percentage below to see how it keeps galaxies together through gravity.
+        </p>
+        
+        <div class="interactive-section">
+            <div class="galaxy-container">
+                <canvas id="galaxy-canvas"></canvas>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label class="control-label">Dark Matter Amount</label>
+                    <input type="range" id="dark-matter-slider" min="0" max="100" value="85" step="1">
+                    <span class="value-display" id="dark-matter-value">85%</span>
+                </div>
+                
+                <div class="control-group">
+                    <label class="control-label">Rotation Speed</label>
+                    <input type="range" id="speed-slider" min="1" max="10" value="5" step="1">
+                    <span class="value-display" id="speed-value">5</span>
+                </div>
+
+                <div class="control-group">
+                    <label class="control-label">Number of Stars</label>
+                    <input type="range" id="stars-slider" min="50" max="500" value="200" step="50">
+                    <span class="value-display" id="stars-value">200</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>With vs Without Dark Matter</h2>
+        <div class="comparison-grid">
+            <div class="comparison-card with-dark-matter">
+                <h3>Universe WITH Dark Matter</h3>
+                <canvas class="comparison-visual" id="with-dm-canvas"></canvas>
+                <p class="info-text">Galaxies form and stay stable. The universe has rich structure with galaxy clusters, walls, and filaments.</p>
+            </div>
+            <div class="comparison-card without-dark-matter">
+                <h3>Universe WITHOUT Dark Matter</h3>
+                <canvas class="comparison-visual" id="without-dm-canvas"></canvas>
+                <p class="info-text">Galaxies fly apart. The universe remains smooth and uniform with very little structure.</p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>How We Detect Dark Matter</h2>
+        <div class="detection-methods">
+            <div class="method-card">
+                <div class="method-icon">🌌</div>
+                <div class="method-title">Galaxy Rotation</div>
+                <p class="method-description">
+                    Galaxies spin faster than they should based on visible matter. Extra gravity from dark matter holds them together.
+                </p>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">🔍</div>
+                <div class="method-title">Gravitational Lensing</div>
+                <p class="method-description">
+                    Dark matter's gravity bends light from distant stars, creating a "fishbowl" distortion effect we can measure.
+                </p>
+            </div>
+            <div class="method-card">
+                <div class="method-icon">📡</div>
+                <div class="method-title">Cosmic Microwave Background</div>
+                <p class="method-description">
+                    Faint light from just after the Big Bang shows patterns that reveal dark matter existed very early in the universe.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Leading Theories</h2>
+        <div class="theory-cards">
+            <div class="theory-card">
+                <div class="theory-name">WIMPs</div>
+                <p class="theory-description">
+                    Weakly Interacting Massive Particles with about 100 times the mass of protons. They would complete the theory of supersymmetry.
+                </p>
+                <span class="theory-status status-emerging">Losing traction</span>
+            </div>
+            <div class="theory-card">
+                <div class="theory-name">Axions</div>
+                <p class="theory-description">
+                    Extremely light particles—a trillion times lighter than an electron. They behave more like waves than particles.
+                </p>
+                <span class="theory-status status-leading">Gaining interest</span>
+            </div>
+            <div class="theory-card">
+                <div class="theory-name">Dark Sector</div>
+                <p class="theory-description">
+                    An entire world of matter existing alongside ours, with "dark" versions of atoms and photons that rarely interact with us.
+                </p>
+                <span class="theory-status status-emerging">Under study</span>
+            </div>
+            <div class="theory-card">
+                <div class="theory-name">Primordial Black Holes</div>
+                <p class="theory-description">
+                    Black holes formed just after the Big Bang that have been wandering the universe ever since, creating gravitational effects.
+                </p>
+                <span class="theory-status status-emerging">Gaining traction</span>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Discovery Timeline</h2>
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-year">1930s</div>
+                    <h3>Fritz Zwicky's Observation</h3>
+                    <p>Astronomer Fritz Zwicky noticed galaxy clusters were spinning faster than they should based on visible matter. He coined the term "dark matter."</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-year">1970s</div>
+                    <h3>Vera Rubin's Discovery</h3>
+                    <p>Astronomer Vera Rubin found that galaxies were rotating so fast they would fly apart unless something invisible was holding them together.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-year">1985</div>
+                    <h3>WIMP Theory Proposed</h3>
+                    <p>UChicago Prof. Michael Turner co-coined the term "WIMPs" (Weakly Interacting Massive Particles) as a leading dark matter candidate.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <div class="timeline-year">Present</div>
+                    <h3>Ongoing Experiments</h3>
+                    <p>Scientists worldwide use advanced detectors deep underground, particle accelerators, and cosmic surveys to hunt for dark matter.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <h2>Test Your Knowledge</h2>
+        <div class="quiz-section">
+            <div class="quiz-question">What percentage of all matter in the universe is dark matter?</div>
+            <div class="quiz-options">
+                <div class="quiz-option" data-answer="false">15%</div>
+                <div class="quiz-option" data-answer="false">50%</div>
+                <div class="quiz-option" data-answer="true">85%</div>
+                <div class="quiz-option" data-answer="false">99%</div>
+            </div>
+            <div class="quiz-feedback"></div>
+        </div>
+    </section>
+
+    <section>
+        <div class="cta-section">
+            <h2>The Search Continues</h2>
+            <p>
+                Scientists at universities worldwide are using cutting-edge experiments to unlock the mystery of dark matter. 
+                From detectors deep beneath mountains to powerful particle accelerators, the hunt is on for one of the universe's greatest secrets.
+            </p>
+            <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})">Explore Again</button>
+        </div>
+    </section>
+
+    <script>
+        // Particle background animation
+        const particlesCanvas = document.getElementById('particles-canvas');
+        const pCtx = particlesCanvas.getContext('2d');
+        particlesCanvas.width = window.innerWidth;
+        particlesCanvas.height = window.innerHeight;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * particlesCanvas.width;
+                this.y = Math.random() * particlesCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.5;
+                this.vy = (Math.random() - 0.5) * 0.5;
+                this.radius = Math.random() * 2 + 1;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > particlesCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > particlesCanvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                pCtx.beginPath();
+                pCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                pCtx.fillStyle = `rgba(102, 126, 234, ${Math.random() * 0.5 + 0.3})`;
+                pCtx.fill();
+            }
+        }
+
+        const particles = Array.from({ length: 100 }, () => new Particle());
+
+        function animateParticles() {
+            pCtx.clearRect(0, 0, particlesCanvas.width, particlesCanvas.height);
+            
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
+            });
+
+            // Draw connections
+            particles.forEach((p1, i) => {
+                particles.slice(i + 1).forEach(p2 => {
+                    const dx = p1.x - p2.x;
+                    const dy = p1.y - p2.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 100) {
+                        pCtx.beginPath();
+                        pCtx.moveTo(p1.x, p1.y);
+                        pCtx.lineTo(p2.x, p2.y);
+                        pCtx.strokeStyle = `rgba(102, 126, 234, ${0.2 * (1 - distance / 100)})`;
+                        pCtx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateParticles);
+        }
+
+        animateParticles();
+
+        // Galaxy simulation
+        const galaxyCanvas = document.getElementById('galaxy-canvas');
+        const gCtx = galaxyCanvas.getContext('2d');
+        galaxyCanvas.width = galaxyCanvas.offsetWidth;
+        galaxyCanvas.height = galaxyCanvas.offsetHeight;
+
+        let darkMatterAmount = 85;
+        let rotationSpeed = 5;
+        let numStars = 200;
+        let stars = [];
+
+        class Star {
+            constructor() {
+                this.angle = Math.random() * Math.PI * 2;
+                this.distance = Math.random() * Math.min(galaxyCanvas.width, galaxyCanvas.height) / 2.5;
+                this.speed = 0.005 * rotationSpeed;
+                this.size = Math.random() * 2 + 1;
+                this.brightness = Math.random();
+            }
+
+            update() {
+                // Speed should decrease with distance without dark matter
+                const expectedSpeed = 1 / Math.sqrt(this.distance + 1);
+                const darkMatterEffect = darkMatterAmount / 100;
+                const actualSpeed = expectedSpeed * (1 - darkMatterEffect) + this.speed * darkMatterEffect;
+                
+                this.angle += actualSpeed;
+            }
+
+            draw() {
+                const centerX = galaxyCanvas.width / 2;
+                const centerY = galaxyCanvas.height / 2;
+                const x = centerX + Math.cos(this.angle) * this.distance;
+                const y = centerY + Math.sin(this.angle) * this.distance;
+
+                gCtx.beginPath();
+                gCtx.arc(x, y, this.size, 0, Math.PI * 2);
+                gCtx.fillStyle = `rgba(255, 255, 255, ${this.brightness})`;
+                gCtx.fill();
+
+                // Add glow
+                const gradient = gCtx.createRadialGradient(x, y, 0, x, y, this.size * 3);
+                gradient.addColorStop(0, `rgba(102, 126, 234, ${this.brightness * 0.3})`);
+                gradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+                gCtx.fillStyle = gradient;
+                gCtx.beginPath();
+                gCtx.arc(x, y, this.size * 3, 0, Math.PI * 2);
+                gCtx.fill();
+            }
+        }
+
+        function initStars() {
+            stars = Array.from({ length: numStars }, () => new Star());
+        }
+
+        initStars();
+
+        function animateGalaxy() {
+            gCtx.clearRect(0, 0, galaxyCanvas.width, galaxyCanvas.height);
+
+            // Draw galaxy center
+            const centerX = galaxyCanvas.width / 2;
+            const centerY = galaxyCanvas.height / 2;
+            const gradient = gCtx.createRadialGradient(centerX, centerY, 0, centerX, centerY, 50);
+            gradient.addColorStop(0, 'rgba(240, 147, 251, 0.8)');
+            gradient.addColorStop(1, 'rgba(102, 126, 234, 0)');
+            gCtx.fillStyle = gradient;
+            gCtx.beginPath();
+            gCtx.arc(centerX, centerY, 50, 0, Math.PI * 2);
+            gCtx.fill();
+
+            stars.forEach(star => {
+                star.update();
+                star.draw();
+            });
+
+            requestAnimationFrame(animateGalaxy);
+        }
+
+        animateGalaxy();
+
+        // Controls
+        document.getElementById('dark-matter-slider').addEventListener('input', (e) => {
+            darkMatterAmount = parseInt(e.target.value);
+            document.getElementById('dark-matter-value').textContent = darkMatterAmount + '%';
+        });
+
+        document.getElementById('speed-slider').addEventListener('input', (e) => {
+            rotationSpeed = parseInt(e.target.value);
+            document.getElementById('speed-value').textContent = rotationSpeed;
+            stars.forEach(star => star.speed = 0.005 * rotationSpeed);
+        });
+
+        document.getElementById('stars-slider').addEventListener('input', (e) => {
+            numStars = parseInt(e.target.value);
+            document.getElementById('stars-value').textContent = numStars;
+            initStars();
+        });
+
+        // Comparison visualizations
+        function drawComparison(canvasId, hasDarkMatter) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            if (hasDarkMatter) {
+                // Structured galaxy with spiral arms
+                for (let i = 0; i < 100; i++) {
+                    const angle = (i / 100) * Math.PI * 4;
+                    const distance = (i / 100) * Math.min(canvas.width, canvas.height) / 2.5;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+
+                    ctx.beginPath();
+                    ctx.arc(x, y, 2, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(102, 126, 234, ${1 - i / 100})`;
+                    ctx.fill();
+                }
+
+                // Add clusters
+                for (let i = 0; i < 5; i++) {
+                    const angle = (i / 5) * Math.PI * 2;
+                    const distance = Math.min(canvas.width, canvas.height) / 4;
+                    const clusterX = centerX + Math.cos(angle) * distance;
+                    const clusterY = centerY + Math.sin(angle) * distance;
+
+                    for (let j = 0; j < 20; j++) {
+                        const offsetX = (Math.random() - 0.5) * 30;
+                        const offsetY = (Math.random() - 0.5) * 30;
+                        ctx.beginPath();
+                        ctx.arc(clusterX + offsetX, clusterY + offsetY, 1.5, 0, Math.PI * 2);
+                        ctx.fillStyle = 'rgba(240, 147, 251, 0.8)';
+                        ctx.fill();
+                    }
+                }
+            } else {
+                // Scattered, dispersed particles
+                for (let i = 0; i < 150; i++) {
+                    const x = Math.random() * canvas.width;
+                    const y = Math.random() * canvas.height;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 1, 0, Math.PI * 2);
+                    ctx.fillStyle = 'rgba(160, 174, 192, 0.4)';
+                    ctx.fill();
+                }
+            }
+        }
+
+        drawComparison('with-dm-canvas', true);
+        drawComparison('without-dm-canvas', false);
+
+        // Dark matter web visualization
+        const webCanvas = document.getElementById('web-canvas');
+        const wCtx = webCanvas.getContext('2d');
+        webCanvas.width = webCanvas.offsetWidth;
+        webCanvas.height = webCanvas.offsetHeight;
+
+        class WebNode {
+            constructor() {
+                this.x = Math.random() * webCanvas.width;
+                this.y = Math.random() * webCanvas.height;
+                this.vx = (Math.random() - 0.5) * 0.3;
+                this.vy = (Math.random() - 0.5) * 0.3;
+                this.radius = Math.random() * 3 + 2;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > webCanvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > webCanvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                wCtx.beginPath();
+                wCtx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                wCtx.fillStyle = '#667eea';
+                wCtx.fill();
+            }
+        }
+
+        const webNodes = Array.from({ length: 40 }, () => new WebNode());
+
+        function animateWeb() {
+            wCtx.clearRect(0, 0, webCanvas.width, webCanvas.height);
+
+            webNodes.forEach((node, i) => {
+                node.update();
+                node.draw();
+
+                // Draw connections
+                webNodes.slice(i + 1).forEach(otherNode => {
+                    const dx = node.x - otherNode.x;
+                    const dy = node.y - otherNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    if (distance < 150) {
+                        wCtx.beginPath();
+                        wCtx.moveTo(node.x, node.y);
+                        wCtx.lineTo(otherNode.x, otherNode.y);
+                        wCtx.strokeStyle = `rgba(102, 126, 234, ${0.3 * (1 - distance / 150)})`;
+                        wCtx.lineWidth = 1.5;
+                        wCtx.stroke();
+                    }
+                });
+            });
+
+            requestAnimationFrame(animateWeb);
+        }
+
+        animateWeb();
+
+        // Quiz functionality
+        const quizOptions = document.querySelectorAll('.quiz-option');
+        const quizFeedback = document.querySelector('.quiz-feedback');
+
+        quizOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const isCorrect = option.dataset.answer === 'true';
+                
+                quizOptions.forEach(opt => {
+                    opt.style.pointerEvents = 'none';
+                    if (opt.dataset.answer === 'true') {
+                        opt.classList.add('correct');
+                    } else if (opt === option && !isCorrect) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+
+                quizFeedback.classList.add('show');
+                if (isCorrect) {
+                    quizFeedback.classList.add('correct');
+                    quizFeedback.textContent = '✓ Correct! Dark matter makes up about 85% of all matter in the universe.';
+                } else {
+                    quizFeedback.classList.add('incorrect');
+                    quizFeedback.textContent = '✗ Not quite. Dark matter actually makes up about 85% of all matter in the universe.';
+                }
+            });
+        });
+
+        // Resize handlers
+        window.addEventListener('resize', () => {
+            particlesCanvas.width = window.innerWidth;
+            particlesCanvas.height = window.innerHeight;
+            
+            galaxyCanvas.width = galaxyCanvas.offsetWidth;
+            galaxyCanvas.height = galaxyCanvas.offsetHeight;
+            
+            webCanvas.width = webCanvas.offsetWidth;
+            webCanvas.height = webCanvas.offsetHeight;
+
+            drawComparison('with-dm-canvas', true);
+            drawComparison('without-dm-canvas', false);
+        });
+
+        // Add floating particles effect
+        setInterval(() => {
+            const particle = document.createElement('div');
+            particle.className = 'particle-effect';
+            particle.style.left = Math.random() * window.innerWidth + 'px';
+            particle.style.bottom = '0';
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 4000);
+        }, 300);
+    </script>
+</body>
+</html>
